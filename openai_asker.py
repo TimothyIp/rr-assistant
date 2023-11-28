@@ -1,6 +1,17 @@
-from env import PINCONE_API_KEY, PINECONE_ENV, VECTOR_INDEX_NAME
-from langchain.vectorstores.pinecone import Pinecone
+from env import (
+    PINCONE_API_KEY,
+    PINECONE_ENV,
+    VECTOR_INDEX_NAME,
+    ZILLIZ_CLOUD_URI,
+    ZILLIZ_CLOUD_API_KEY,
+    VECTOR_STORE,
+    OPENAI_MODEL,
+    OPENAI_API_KEY,
+)
 import os
+import logging
+from langchain.vectorstores.pinecone import Pinecone
+from langchain.vectorstores.milvus import Milvus
 from langchain.embeddings.openai import OpenAIEmbeddings
 import re
 import pinecone
@@ -9,63 +20,15 @@ from langchain.chat_models import ChatOpenAI
 from typing import List, Dict
 from slack_bolt import BoltContext
 import tiktoken
+from openai import OpenAI
+from openai.types.chat import ChatCompletion
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
+from markdown import slack_to_markdown
+import time
 
 
 MAX_TOKENS = 1024
-
-
-# Conversion from Slack mrkdwn to OpenAI markdown
-# See also: https://api.slack.com/reference/surfaces/formatting#basics
-def slack_to_markdown(content: str) -> str:
-    # Split the input string into parts based on code blocks and inline code
-    parts = re.split(r"(```.+?```|`[^`\n]+?`)", content)
-
-    # Apply the bold, italic, and strikethrough formatting to text not within code
-    result = ""
-    for part in parts:
-        if part.startswith("```") or part.startswith("`"):
-            result += part
-        else:
-            for o, n in [
-                (r"\*(?!\s)([^\*\n]+?)(?<!\s)\*", r"**\1**"),  # *bold* to **bold**
-                (r"_(?!\s)([^_\n]+?)(?<!\s)_", r"*\1*"),  # _italic_ to *italic*
-                (r"~(?!\s)([^~\n]+?)(?<!\s)~", r"~~\1~~"),  # ~strike~ to ~~strike~~
-            ]:
-                part = re.sub(o, n, part)
-            result += part
-    return result
-
-
-# Conversion from OpenAI markdown to Slack mrkdwn
-# See also: https://api.slack.com/reference/surfaces/formatting#basics
-def markdown_to_slack(content: str) -> str:
-    # Split the input string into parts based on code blocks and inline code
-    parts = re.split(r"(```.+?```|`[^`\n]+?`)", content)
-
-    # Apply the bold, italic, and strikethrough formatting to text not within code
-    result = ""
-    for part in parts:
-        if part.startswith("```") or part.startswith("`"):
-            result += part
-        else:
-            for o, n in [
-                (
-                    r"\*\*\*(?!\s)([^\*\n]+?)(?<!\s)\*\*\*",
-                    r"_*\1*_",
-                ),  # ***bold italic*** to *_bold italic_*
-                (
-                    r"(?<![\*_])\*(?!\s)([^\*\n]+?)(?<!\s)\*(?![\*_])",
-                    r"_\1_",
-                ),  # *italic* to _italic_
-                (r"\*\*(?!\s)([^\*\n]+?)(?<!\s)\*\*", r"*\1*"),  # **bold** to *bold*
-                (r"__(?!\s)([^_\n]+?)(?<!\s)__", r"*\1*"),  # __bold__ to *bold*
-                (r"~~(?!\s)([^~\n]+?)(?<!\s)~~", r"~\1~"),  # ~~strike~~ to ~strike~
-            ]:
-                part = re.sub(o, n, part)
-            result += part
-    return result
 
 
 # Format message from Slack to send to OpenAI
@@ -82,6 +45,50 @@ def format_openai_message_content(content: str, translate_markdown: bool) -> str
         content = slack_to_markdown(content)
 
     return content
+
+
+def generate_slack_thread_summary(
+    *,
+    context: BoltContext,
+    logger: logging.Logger,
+    prompt: str,
+    thread_content: str,
+    timeout_seconds: int,
+) -> str:
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You're an assistant tasked with helping Slack users by summarizing threads. "
+                "You'll receive a collection of replies in this format: <@user_id>: reply text\n"
+                "Your role is to provide a very detailed summary that highlights key facts and which <@user_id made which decision. Always return this summary in Markdown format in a bullet list form with bold section categories"
+            ),
+        },
+        {
+            "role": "user",
+            "content": f"{prompt}\n\n{thread_content}",
+        },
+    ]
+    start_time = time.time()
+    ai_client = OpenAI(api_key=OPENAI_API_KEY)
+
+    openai_response: ChatCompletion = ai_client.chat.completions.create(
+        model=OPENAI_MODEL,
+        messages=messages,
+        top_p=1,
+        n=1,
+        max_tokens=MAX_TOKENS,
+        temperature=1,
+        presence_penalty=0,
+        frequency_penalty=0,
+        logit_bias={},
+        user=context.actor_user_id,
+        stream=False,
+        timeout=timeout_seconds,
+    )
+    spent_time = time.time() - start_time
+    logger.debug(f"Making a summary took {spent_time} seconds")
+    return openai_response.choices[0].message.content
 
 
 def calculate_num_tokens(
@@ -138,42 +145,99 @@ def ask_llm(*, messages: List[Dict[str, str]], context: BoltContext) -> str:
         prompt = latest_message["content"]
 
     parsed_prompt = re.sub(f"<@{context.bot_user_id}>\\s*", "", prompt)
-    print("PROMPT:", parsed_prompt)
-
-    # for i, message in enumerate(messages[-]):
-    #     prompt += message["content"] + "\n"
+    parsed_prompt = re.sub(f"<@{context.user_id}>\\s*", "", parsed_prompt)
 
     return ask_openai(parsed_prompt)
 
 
-def ask_openai(question) -> str:
+def get_pinecone_retriever():
     # initialize pinecone
-    print("Init retriever")
+    print("Init retriever - pinecone")
     pinecone.init(api_key=PINCONE_API_KEY, environment=PINECONE_ENV)
     embeddings = OpenAIEmbeddings()
 
     pinecone_client = Pinecone.from_existing_index(VECTOR_INDEX_NAME, embeddings)
 
-    retriever = pinecone_client.as_retriever(search_type="mmr")
+    return pinecone_client.as_retriever(
+        search_type="mmr",
+    )
 
-    matched_docs = retriever.get_relevant_documents(question)
-    for i, d in enumerate(matched_docs):
-        print(f"\n## Document {i}\n")
-        print(d.page_content)
-        print(d.metadata)
+
+def get_milvus_retriever():
+    print("Init retriever - milvus")
+    embeddings = OpenAIEmbeddings()
+    return Milvus(
+        embeddings,
+        connection_args={
+            "uri": ZILLIZ_CLOUD_URI,
+            "token": ZILLIZ_CLOUD_API_KEY,
+            "secure": True,
+            "collection_name": "LangChainCollection",
+        },
+    ).as_retriever(
+        search_type="mmr",
+    )
+
+
+def get_vector_store_retriever():
+    if VECTOR_STORE == "pinecone":
+        return get_pinecone_retriever()
+
+    if VECTOR_STORE == "milvus":
+        return get_milvus_retriever()
+
+
+def ask_openai(question) -> str:
+    print("QUESTION:", question)
+    retriever = get_vector_store_retriever()
 
     memory = ConversationBufferMemory(
-        memory_key="history", input_key="question", output_key="answer"
+        memory_key="chat_history",
+        input_key="question",
+        output_key="answer",
+        return_messages=True,
+        ai_prefix="AI Assistant",
+        human_prefix="Friend",
     )
-    # template = """You are the helpful Rose Rocket assistant, please answer the question as descriptive as possible from the context given to you.
-    # If you do not know the answer to the question, simply respond with "I don't know the answer to that question.".
-    # If questions are asked where there is no relevant context available, simply respond with "I'm sorry, I don't have enough information to answer that question."
-    # Context: {context}
+    # Many things to see, many noises, big tribe life in Toronto.
 
-    # Human: {question}
-    # Assistant:"""
+    template = """You are an helpful AI assistant for answering questions about Rose Rocket.
+    You are given the following context and a question. Provide a concise and detailed answer.
+    If you don't know the answer, just say "I don't know the answer to that question."
 
-    # prompt = PromptTemplate(input_variables=["context", "question"], template=template)
+    Question: {question}
+    =========
+    {summaries}
+    =========
+    Answer in Markdown:"""
+
+    # template = """You are an helpful AI assistant for answering questions about Rose Rocket.
+    # You are given the following context and a question. Provide a detailed answer.
+    # If you don't know the answer, just say "I don't know the answer to that question."
+
+    # Question: {question}
+    # =========
+    # {summaries}
+    # =========
+    # Answer in Markdown:"""
+
+    # template = """You are a caveman.
+    # You are given the following question.
+
+    # Question: {question}
+    # =========
+    # {summaries}
+    # =========
+    # ALWAYS return the answer as caveman speak and return the best answer you can:"""
+
+    QA_PROMPT = PromptTemplate(
+        template=template, input_variables=["question", "summaries"]
+    )
+
+    DOC_PROMPT = PromptTemplate(
+        template="Content: {page_content}\nSource: {source}\n",
+        input_variables=["page_content", "source"],
+    )
 
     res = ""
     llm = ChatOpenAI(api_key=os.environ["OPENAI_API_KEY"], temperature=0)
@@ -184,9 +248,11 @@ def ask_openai(question) -> str:
         return_source_documents=True,
         verbose=True,
         memory=memory,
-        # chain_type_kwargs={
-        #     "prompt": prompt,
-        # },
+        chain_type_kwargs={
+            "prompt": QA_PROMPT,
+            "document_prompt": DOC_PROMPT,
+            "verbose": True,
+        },
     )
 
     # Get the answer from the chain
@@ -202,8 +268,6 @@ def ask_openai(question) -> str:
         res["answer"],
         res["source_documents"],
     )
-
-    print("RESULT:", docs)
 
     if (
         answer == "I'm sorry, I don't have enough information to answer that question."

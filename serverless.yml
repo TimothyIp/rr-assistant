@@ -1,0 +1,25 @@
+service: rr-assistant
+
+frameworkVersion: "3"
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: python3.10
+
+functions:
+  app:
+    handler: app.handler
+    url: true
+
+package:
+  exclude:
+    - node_modules/**
+    - .venv/**
+    - __pycache__
+
+plugins:
+  - serverless-python-requirements
+  - serverless-dotenv-plugin
+  - serverless-offline
