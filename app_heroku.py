@@ -51,7 +51,3 @@ def set_openai_api_key(context: BoltContext, next_):
     context["OPENAI_API_KEY"] = os.environ["OPENAI_API_KEY"]
     context["OPENAI_MODEL"] = os.environ["OPENAI_MODEL"]
     next_()
-
-
-# Initializes your app with your bot token and socket mode handler
-SocketModeHandler(app, os.environ["SLACK_APP_TOKEN"]).start()
