@@ -39,3 +39,11 @@ if __name__ == "__main__":
     # Initializes your app with your bot token and socket mode handler
     SocketModeHandler(app, os.environ["SLACK_APP_TOKEN"]).start()
     logging.basicConfig(level="INFO")
+
+    PORT = os.environ["PORT"]
+    # if (port == null || port == "") {
+    #   port = 8000;
+    # }
+    if not PORT:
+        PORT = 8000
+    app.listen(PORT)

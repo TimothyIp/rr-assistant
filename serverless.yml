@@ -10,7 +10,7 @@ provider:
 
 functions:
   app:
-    handler: app.handler
+    handler: app_lambda.handler
     url: true
 
 package:

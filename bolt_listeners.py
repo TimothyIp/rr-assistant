@@ -62,6 +62,20 @@ def find_parent_message(
     return messages[0] if len(messages) > 0 else None
 
 
+def is_user_allowed(context: BoltContext, client: WebClient):
+    payments_dev_user_group_id = "S0306L360JH"
+
+    resp = client.usergroups_users_list(usergroup=payments_dev_user_group_id)
+
+    allowed_user_ids = resp["users"]
+    allowed_slack_ids = [
+        "U8807CX62",  # Tim
+    ]
+    allowed_slack_ids.extend(allowed_user_ids)
+
+    return context.user_id in allowed_slack_ids
+
+
 # ----------------------------
 # WIP reply message stuff
 # ----------------------------
@@ -119,7 +133,6 @@ def respond_to_app_mention(
     client: WebClient,
     logger: logging.Logger,
 ):
-    print("APP_MENTION_CALLED")
     if payload.get("thread_ts") is not None:
         parent_message = find_parent_message(
             client, context.channel_id, payload.get("thread_ts")
@@ -891,6 +904,27 @@ def prepare_and_share_channel_summary(
     context: BoltContext,
     logger: logging.Logger,
 ):
+    if not is_user_allowed(context=context, client=client):
+        client.views_update(
+            view_id=payload["id"],
+            view={
+                "type": "modal",
+                "callback_id": "request-channel-summary",
+                "title": {"type": "plain_text", "text": "Summarize the channel"},
+                "close": {"type": "plain_text", "text": "Close"},
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "Need to request permission to use",
+                        },
+                    },
+                ],
+            },
+        )
+        return
+
     try:
         where_to_display = (
             extract_state_value(payload, "where-to-share-summary")
@@ -934,7 +968,7 @@ def prepare_and_share_channel_summary(
                 view_id=payload["id"],
                 view={
                     "type": "modal",
-                    "callback_id": "request-thread-summary",
+                    "callback_id": "request-channel-summary",
                     "title": {"type": "plain_text", "text": "Summarize the channel"},
                     "close": {"type": "plain_text", "text": "Close"},
                     "blocks": [
@@ -971,7 +1005,7 @@ def prepare_and_share_channel_summary(
             view_id=payload["id"],
             view={
                 "type": "modal",
-                "callback_id": "request-thread-summary",
+                "callback_id": "request-channel-summary",
                 "title": {"type": "plain_text", "text": "Summarize the channel"},
                 "close": {"type": "plain_text", "text": "Close"},
                 "blocks": [
@@ -991,7 +1025,7 @@ def prepare_and_share_channel_summary(
             view_id=payload["id"],
             view={
                 "type": "modal",
-                "callback_id": "request-thread-summary",
+                "callback_id": "request-channel-summary",
                 "title": {"type": "plain_text", "text": "Summarize the channel"},
                 "close": {"type": "plain_text", "text": "Close"},
                 "blocks": [
@@ -1014,6 +1048,26 @@ def prepare_and_share_thread_summary(
     context: BoltContext,
     logger: logging.Logger,
 ):
+    if not is_user_allowed(context=context, client=client):
+        client.views_update(
+            view_id=payload["id"],
+            view={
+                "type": "modal",
+                "callback_id": "request-thread-summary",
+                "title": {"type": "plain_text", "text": "Summarize the thread"},
+                "close": {"type": "plain_text", "text": "Close"},
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "Need to request permission to use",
+                        },
+                    },
+                ],
+            },
+        )
+        return
     try:
         where_to_display = (
             extract_state_value(payload, "where-to-share-summary")
