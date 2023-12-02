@@ -7,7 +7,6 @@ from bolt_listeners import before_authorize, register_listeners
 from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
 from slack_bolt.adapter.flask import SlackRequestHandler
 from flask import Flask, request
-from slack_bolt.adapter.flask import SlackRequestHandler
 
 
 load_dotenv()
