@@ -69,16 +69,14 @@ def is_user_allowed(context: BoltContext, client: WebClient):
 
     allowed_user_ids = resp["users"]
     allowed_slack_ids = [
-        "U8807CX62",  # Tim
+        # Tim
+        "U8807CX62",
+        # Aaron
+        "U03FJ97TNN5",
     ]
     allowed_slack_ids.extend(allowed_user_ids)
 
     return context.user_id in allowed_slack_ids
-
-
-# ----------------------------
-# WIP reply message stuff
-# ----------------------------
 
 
 def post_wip_message(
