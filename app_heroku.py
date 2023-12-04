@@ -20,9 +20,6 @@ app = App(
     process_before_response=True,
 )
 
-flask_app = Flask(__name__)
-handler = SlackRequestHandler(app)
-
 
 # Listens to incoming messages that contain "hello"
 # To learn available listener arguments,
@@ -33,11 +30,11 @@ def message_hello(message, say):
     say(f"Hey there <@{message['user']}>!")
 
 
-flask_app = Flask(__name__)
-handler = SlackRequestHandler(app)
-
 app.client.retry_handlers.append(RateLimitErrorRetryHandler(max_retry_count=2))
 register_listeners(app)
+
+flask_app = Flask(__name__)
+handler = SlackRequestHandler(app)
 
 
 @flask_app.route("/slack/events", methods=["POST"])
