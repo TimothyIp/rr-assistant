@@ -231,7 +231,7 @@ def ask_openai(context: BoltContext, question) -> str:
     =========
     Context: {summaries}
     =========
-    Answer in Markdown:"""
+    """
 
     # template = """You are an helpful AI assistant for answering questions about Rose Rocket.
     # You are given the following context and a question. Provide a detailed answer.
