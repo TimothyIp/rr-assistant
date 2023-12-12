@@ -226,7 +226,7 @@ def ask_openai(context: BoltContext, question) -> str:
     template = """You are an helpful AI assistant for answering questions about Rose Rocket.
     You are given the following question and context. Provide a concise and detailed answer.
     If you don't know the answer, just say "I don't know the answer to that question."
-    Format the text in markdown that slack that use
+    Format the response in markdown that Slack can understands.
 
     Question: {question}
     =========
