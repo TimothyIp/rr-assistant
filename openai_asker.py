@@ -28,7 +28,6 @@ from openai import OpenAI
 from openai.types.chat import ChatCompletion
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
-from bolt_listeners import is_test_user
 
 from markdown import slack_to_markdown
 import time
@@ -191,6 +190,16 @@ def get_vector_store_retriever():
 
     if VECTOR_STORE == "milvus":
         return get_milvus_retriever()
+
+
+## Primarily for testing new functionality out
+def is_test_user(context: BoltContext):
+    test_user_slack_ids = [
+        # Tim
+        "U8807CX62",
+    ]
+
+    return context.user_id in test_user_slack_ids
 
 
 def ask_openai(context: BoltContext, question) -> str:
