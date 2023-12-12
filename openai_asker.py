@@ -13,6 +13,10 @@ import logging
 from langchain.vectorstores.pinecone import Pinecone
 from langchain.vectorstores.milvus import Milvus
 from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import CohereRerank
+
+
 import re
 import pinecone
 from langchain.chains import RetrievalQAWithSourcesChain
@@ -24,6 +28,8 @@ from openai import OpenAI
 from openai.types.chat import ChatCompletion
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
+from bolt_listeners import is_test_user
+
 from markdown import slack_to_markdown
 import time
 
@@ -147,7 +153,7 @@ def ask_llm(*, messages: List[Dict[str, str]], context: BoltContext) -> str:
     parsed_prompt = re.sub(f"<@{context.bot_user_id}>\\s*", "", prompt)
     parsed_prompt = re.sub(f"<@{context.user_id}>\\s*", "", parsed_prompt)
 
-    return ask_openai(parsed_prompt)
+    return ask_openai(context, parsed_prompt)
 
 
 def get_pinecone_retriever():
@@ -187,9 +193,26 @@ def get_vector_store_retriever():
         return get_milvus_retriever()
 
 
-def ask_openai(question) -> str:
+def ask_openai(context: BoltContext, question) -> str:
     print("QUESTION:", question)
     retriever = get_vector_store_retriever()
+
+    if is_test_user(context):
+        ## remove this afterwards
+        embeddings = OpenAIEmbeddings()
+        base_retriever = Milvus(
+            embeddings,
+            connection_args={
+                "uri": ZILLIZ_CLOUD_URI,
+                "token": ZILLIZ_CLOUD_API_KEY,
+                "secure": True,
+                "collection_name": "LangChainCollection",
+            },
+        ).as_retriever(search_type="mmr", search_kwargs={"k": 20})
+        compressor = CohereRerank()
+        retriever = ContextualCompressionRetriever(
+            base_compressor=compressor, base_retriever=base_retriever
+        )
 
     memory = ConversationBufferMemory(
         memory_key="chat_history",
