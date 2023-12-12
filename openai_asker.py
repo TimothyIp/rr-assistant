@@ -220,7 +220,7 @@ def ask_openai(context: BoltContext, question) -> str:
             },
         ).as_retriever(search_type="mmr", search_kwargs={"k": 20})
         compressor = CohereRerank(
-            cohere_api_key=os.environ["COHERE_API_KEY"], user_agent="langchain"
+            top_n=4, cohere_api_key=os.environ["COHERE_API_KEY"], user_agent="langchain"
         )
         retriever = ContextualCompressionRetriever(
             base_compressor=compressor, base_retriever=base_retriever
