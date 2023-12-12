@@ -201,8 +201,9 @@ def is_test_user(context: BoltContext):
 
 
 def ask_openai(context: BoltContext, question) -> str:
-    print("USER_ID", context.user_id)
+    print("USER_ID:", context.user_id)
     print("QUESTION:", question)
+    print("AI MODEL:", OPENAI_MODEL)
     retriever = get_vector_store_retriever()
 
     compressor = CohereRerank(
