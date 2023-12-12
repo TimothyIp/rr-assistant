@@ -15,6 +15,7 @@ from langchain.vectorstores.milvus import Milvus
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import CohereRerank
+from markdown import markdown_to_slack
 
 
 import re
@@ -226,7 +227,6 @@ def ask_openai(context: BoltContext, question) -> str:
     template = """You are an helpful AI assistant for answering questions about Rose Rocket.
     You are given the following question and context. Provide a concise and detailed answer.
     If you don't know the answer, just say "I don't know the answer to that question."
-    Format the response in markdown that Slack can understands.
 
     Question: {question}
     =========
@@ -293,6 +293,8 @@ def ask_openai(context: BoltContext, question) -> str:
         res["answer"],
         res["source_documents"],
     )
+
+    answer = markdown_to_slack(answer)
 
     if (
         answer == "I'm sorry, I don't have enough information to answer that question."

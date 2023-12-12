@@ -1090,6 +1090,8 @@ def prepare_and_share_thread_summary(
             timeout_seconds=OPENAI_TIMEOUT_SECONDS,
         )
 
+        summary = markdown_to_slack(summary)
+
         slack_user_id_format = f"<@{context.user_id}>"
         if where_to_display == "modal":
             client.views_update(
