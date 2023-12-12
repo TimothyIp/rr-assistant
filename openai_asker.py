@@ -261,7 +261,9 @@ def ask_openai(context: BoltContext, question) -> str:
     )
 
     res = ""
-    llm = ChatOpenAI(api_key=os.environ["OPENAI_API_KEY"], temperature=0)
+    llm = ChatOpenAI(
+        model=OPENAI_MODEL, api_key=os.environ["OPENAI_API_KEY"], temperature=0
+    )
     qa = RetrievalQAWithSourcesChain.from_chain_type(
         llm=llm,
         chain_type="stuff",
