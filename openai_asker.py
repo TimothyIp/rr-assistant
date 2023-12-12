@@ -268,8 +268,8 @@ def ask_openai(context: BoltContext, question) -> str:
     )
 
     DOC_PROMPT = PromptTemplate(
-        template="Content: {page_content}\nSource: {source}\n",
-        input_variables=["page_content", "source"],
+        template="Content: {page_content}\n",
+        input_variables=["page_content"],
     )
 
     res = ""
