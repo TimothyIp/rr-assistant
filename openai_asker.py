@@ -206,22 +206,22 @@ def ask_openai(context: BoltContext, question) -> str:
     print("QUESTION:", question)
     retriever = get_vector_store_retriever()
 
-    if is_test_user(context):
-        ## remove this afterwards
-        embeddings = OpenAIEmbeddings()
-        base_retriever = Milvus(
-            embeddings,
-            connection_args={
-                "uri": ZILLIZ_CLOUD_URI,
-                "token": ZILLIZ_CLOUD_API_KEY,
-                "secure": True,
-                "collection_name": "LangChainCollection",
-            },
-        ).as_retriever(search_type="mmr", search_kwargs={"k": 20})
-        compressor = CohereRerank(cohere_api_key=os.environ["COHERE_API_KEY"])
-        retriever = ContextualCompressionRetriever(
-            base_compressor=compressor, base_retriever=base_retriever
-        )
+    # if is_test_user(context):
+    #     ## remove this afterwards
+    #     embeddings = OpenAIEmbeddings()
+    #     base_retriever = Milvus(
+    #         embeddings,
+    #         connection_args={
+    #             "uri": ZILLIZ_CLOUD_URI,
+    #             "token": ZILLIZ_CLOUD_API_KEY,
+    #             "secure": True,
+    #             "collection_name": "LangChainCollection",
+    #         },
+    #     ).as_retriever(search_type="mmr", search_kwargs={"k": 20})
+    #     compressor = CohereRerank(cohere_api_key=os.environ["COHERE_API_KEY"])
+    #     retriever = ContextualCompressionRetriever(
+    #         base_compressor=compressor, base_retriever=base_retriever
+    #     )
 
     memory = ConversationBufferMemory(
         memory_key="chat_history",
