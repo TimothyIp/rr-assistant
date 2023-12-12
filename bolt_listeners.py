@@ -63,20 +63,21 @@ def find_parent_message(
 
 
 def is_user_allowed(context: BoltContext, client: WebClient):
-    payments_dev_user_group_id = "S0306L360JH"
+    return True
+    # payments_dev_user_group_id = "S0306L360JH"
 
-    resp = client.usergroups_users_list(usergroup=payments_dev_user_group_id)
+    # resp = client.usergroups_users_list(usergroup=payments_dev_user_group_id)
 
-    allowed_user_ids = resp["users"]
-    allowed_slack_ids = [
-        # Tim
-        "U8807CX62",
-        # Aaron
-        "U03FJ97TNN5",
-    ]
-    allowed_slack_ids.extend(allowed_user_ids)
+    # allowed_user_ids = resp["users"]
+    # allowed_slack_ids = [
+    #     # Tim
+    #     "U8807CX62",
+    #     # Aaron
+    #     "U03FJ97TNN5",
+    # ]
+    # allowed_slack_ids.extend(allowed_user_ids)
 
-    return context.user_id in allowed_slack_ids
+    # return context.user_id in allowed_slack_ids
 
 
 def post_wip_message(
