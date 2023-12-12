@@ -207,6 +207,7 @@ def ask_openai(context: BoltContext, question) -> str:
     retriever = get_vector_store_retriever()
 
     if is_test_user(context):
+        print("TEST USER FLOW - USING RERANK")
         ## remove this afterwards
         embeddings = OpenAIEmbeddings()
         base_retriever = Milvus(
