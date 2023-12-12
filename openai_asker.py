@@ -223,12 +223,12 @@ def ask_openai(context: BoltContext, question) -> str:
     # Many things to see, many noises, big tribe life in Toronto.
 
     template = """You are an helpful AI assistant for answering questions about Rose Rocket.
-    You are given the following context and a question. Provide a concise and detailed answer.
+    You are given the following question and context. Provide a concise and detailed answer.
     If you don't know the answer, just say "I don't know the answer to that question."
 
     Question: {question}
     =========
-    {summaries}
+    Context: {summaries}
     =========
     Answer in Markdown:"""
 
