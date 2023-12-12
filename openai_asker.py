@@ -179,9 +179,7 @@ def get_milvus_retriever():
             "secure": True,
             "collection_name": "LangChainCollection",
         },
-    ).as_retriever(
-        search_type="mmr",
-    )
+    ).as_retriever(search_type="mmr", search_kwargs={"k": 20})
 
 
 def get_vector_store_retriever():
@@ -203,28 +201,16 @@ def is_test_user(context: BoltContext):
 
 
 def ask_openai(context: BoltContext, question) -> str:
+    print("USER_ID", context.user_id)
     print("QUESTION:", question)
     retriever = get_vector_store_retriever()
 
-    if is_test_user(context):
-        print("TEST USER FLOW - USING RERANK")
-        ## remove this afterwards
-        embeddings = OpenAIEmbeddings()
-        base_retriever = Milvus(
-            embeddings,
-            connection_args={
-                "uri": ZILLIZ_CLOUD_URI,
-                "token": ZILLIZ_CLOUD_API_KEY,
-                "secure": True,
-                "collection_name": "LangChainCollection",
-            },
-        ).as_retriever(search_type="mmr", search_kwargs={"k": 20})
-        compressor = CohereRerank(
-            top_n=4, cohere_api_key=os.environ["COHERE_API_KEY"], user_agent="langchain"
-        )
-        retriever = ContextualCompressionRetriever(
-            base_compressor=compressor, base_retriever=base_retriever
-        )
+    compressor = CohereRerank(
+        top_n=4, cohere_api_key=os.environ["COHERE_API_KEY"], user_agent="langchain"
+    )
+    retriever = ContextualCompressionRetriever(
+        base_compressor=compressor, base_retriever=retriever
+    )
 
     memory = ConversationBufferMemory(
         memory_key="chat_history",
