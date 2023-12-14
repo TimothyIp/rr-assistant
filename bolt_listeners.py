@@ -619,7 +619,7 @@ def show_summarize_channel_option_modal(
         {
             "text": {
                 "type": "plain_text",
-                "text": "Summarize the last 72 hours",
+                "text": "Summarize the last 24 hours",
             },
             "value": "last_nth_hours",
         },
@@ -878,9 +878,8 @@ def build_channel_replies_as_combined_text(
     oldest = thirty_days_from_now_unix.strftime("%s")
     limit = 50
     if is_limited_by_time:
-        ##2 days worth of channel history
-        two_days_from_now_unix = datetime.date.today() - datetime.timedelta(3)
-        oldest = two_days_from_now_unix.strftime("%s")
+        n_days_from_now_unix = datetime.date.today() - datetime.timedelta(1)
+        oldest = n_days_from_now_unix.strftime("%s")
 
     resp = client.conversations_history(channel=channel, limit=limit, oldest=oldest)
     for message in resp.get("messages"):
