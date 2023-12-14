@@ -234,7 +234,14 @@ def ask_openai(context: BoltContext, question) -> str:
     =========
     """
     if is_test_user(context):
-        template += "ALWAYS return your response as caveman speak."
+        template = """You are an helpful caveman for answering questions about Rose Rocket.
+            You are given the following question and context. Provide an answer in caveman speak.
+
+            Question: {question}
+            =========
+            Context: {summaries}
+            =========
+        """
 
     # template = """You are an helpful AI assistant for answering questions about Rose Rocket.
     # You are given the following context and a question. Provide a detailed answer.
