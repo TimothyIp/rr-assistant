@@ -16,6 +16,7 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import CohereRerank
 from markdown import markdown_to_slack
+from personality_bank import ANIME_WEEB
 
 
 import re
@@ -236,14 +237,15 @@ def ask_openai(context: BoltContext, question) -> str:
     =========
     """
     if is_test_user(context):
-        template = """You are an helpful anime weeb for answering questions about Rose Rocket.
-            You are given the following question and context. Provide an answer in weeb speak and use Kaomoji if possible.
-
+        template = (
+            ANIME_WEEB
+            + """
             Question: {question}
             =========
             Context: {summaries}
             =========
-        """
+            """
+        )
 
     # template = """You are an helpful AI assistant for answering questions about Rose Rocket.
     # You are given the following context and a question. Provide a detailed answer.
