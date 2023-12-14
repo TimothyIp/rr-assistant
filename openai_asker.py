@@ -197,6 +197,7 @@ def is_test_user(context: BoltContext):
         # "U8807CX62", #Tim
         # "U049XMRT755",  # Ping
         # "U056XGEUX4G" # Fortunado
+        "U01HMVAM49M"  # Mibo
     ]
 
     return context.user_id in test_user_slack_ids
@@ -235,8 +236,8 @@ def ask_openai(context: BoltContext, question) -> str:
     =========
     """
     if is_test_user(context):
-        template = """You are an helpful caveman for answering questions about Rose Rocket.
-            You are given the following question and context. Provide an answer in caveman speak.
+        template = """You are an helpful anime weeb for answering questions about Rose Rocket.
+            You are given the following question and context. Provide an answer in weeb speak.
 
             Question: {question}
             =========
