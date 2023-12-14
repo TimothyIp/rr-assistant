@@ -237,7 +237,7 @@ def ask_openai(context: BoltContext, question) -> str:
     """
     if is_test_user(context):
         template = """You are an helpful anime weeb for answering questions about Rose Rocket.
-            You are given the following question and context. Provide an answer in weeb speak.
+            You are given the following question and context. Provide an answer in weeb speak and use Kaomoji if possible.
 
             Question: {question}
             =========
