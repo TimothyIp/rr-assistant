@@ -233,6 +233,8 @@ def ask_openai(context: BoltContext, question) -> str:
     Context: {summaries}
     =========
     """
+    if is_test_user(context):
+        template += "ALWAYS return your response as caveman speak."
 
     # template = """You are an helpful AI assistant for answering questions about Rose Rocket.
     # You are given the following context and a question. Provide a detailed answer.
