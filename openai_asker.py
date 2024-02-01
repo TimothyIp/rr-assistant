@@ -195,7 +195,7 @@ def get_vector_store_retriever():
 ## Primarily for testing new functionality out
 def is_test_user(context: BoltContext):
     test_user_slack_ids = [
-        "U8807CX62",  # Tim
+        # "U8807CX62",  # Tim
         # "U049XMRT755",  # Ping
         "U056XGEUX4G"  # Fortunado
         "U01HMVAM49M",  # Mibo
