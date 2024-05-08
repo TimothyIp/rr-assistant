@@ -8,3 +8,4 @@
 
 ### Can summarize Slack channels
 ![Screenshot from 2024-05-08 11-04-20](https://github.com/TimothyIp/rr-assistant/assets/22341088/a97a08ce-e41d-4603-8793-088898affbf9)
+![Screenshot from 2024-05-08 11-09-19](https://github.com/TimothyIp/rr-assistant/assets/22341088/835d3563-6e7c-437b-b3e0-50767022b771)
