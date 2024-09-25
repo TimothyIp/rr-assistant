@@ -214,20 +214,12 @@ def ask_openai(context: BoltContext, question) -> str:
     print("AI MODEL:", OPENAI_MODEL)
     retriever = get_vector_store_retriever()
 
-    embeddings = OpenAIEmbeddings()
-    relevant_filter = EmbeddingsFilter(
-        embeddings=embeddings, similarity_threshold=0.76, k=6
-    )
-
     cohere_rerank_compressor = CohereRerank(
         top_n=5, cohere_api_key=os.environ["COHERE_API_KEY"], user_agent="langchain"
     )
 
-    pipeline_compressor = DocumentCompressorPipeline(
-        transformers=[relevant_filter, cohere_rerank_compressor]
-    )
     retriever = ContextualCompressionRetriever(
-        base_compressor=pipeline_compressor, base_retriever=retriever
+        base_compressor=cohere_rerank_compressor, base_retriever=retriever
     )
 
     memory = ConversationBufferMemory(
