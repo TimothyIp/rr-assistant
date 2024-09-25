@@ -228,12 +228,11 @@ def ask_openai(context: BoltContext, question) -> str:
     # Many things to see, many noises, big tribe life in Toronto.
 
     template = """You are an helpful AI assistant for answering questions about Rose Rocket.
-    You are given the following question and context. Provide a concise and detailed answer utilizing Slack's markdown language mrkdwn for various formatting elements.
+    You are given the following question and context. Provide a concise and detailed answer following Slack's markdown language mrkdwn for various formatting elements.
     Follow those instructions:
       1. Enclose important words or phrases with *asterisks* for bold emphasis. Do not use multiple asterisks (** shouldn't exist, always only one asterisks *).
       2. Enclose code and numbers and percentages using backticks, like  `this `.
-      3. Introduce bold formatted short intro to organize information in paragraphs if it makes sense
-      4. Use numbered lists or bullet lists. Create a bullet list with "–" symbol.
+      4. For numbered lists or bullet lists. Create a bullet list with "–" symbol.
       5. If you want to combine bullet list items with bold markdown, this is how it should work:
       – *A bold text*: A normal text.
       Never use 2 asterisks after anther like this **. It's an invalid markdown!
