@@ -14,9 +14,12 @@ from langchain.vectorstores.pinecone import Pinecone
 from langchain.vectorstores.milvus import Milvus
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import DocumentCompressorPipeline
+
 
 # from langchain.retrievers.document_compressors import CohereRerank
 from langchain.retrievers.document_compressors import EmbeddingsFilter
+from langchain.retrievers.document_compressors import LLMChainExtractor
 
 
 from markdown import markdown_to_slack
@@ -215,11 +218,18 @@ def ask_openai(context: BoltContext, question) -> str:
     retriever = get_vector_store_retriever()
 
     embeddings = OpenAIEmbeddings()
-    embeddings_filter = EmbeddingsFilter(
+
+    relevant_filter = EmbeddingsFilter(
         embeddings=embeddings, similarity_threshold=0.76, k=6
     )
+
+    llm = OpenAI(api_key=OPENAI_API_KEY, temperature=0)
+    llm_compressor = LLMChainExtractor.from_llm(llm)
+    pipeline_compressor = DocumentCompressorPipeline(
+        transformers=[relevant_filter, llm_compressor]
+    )
     retriever = ContextualCompressionRetriever(
-        base_compressor=embeddings_filter, base_retriever=retriever
+        base_compressor=pipeline_compressor, base_retriever=retriever
     )
 
     memory = ConversationBufferMemory(
