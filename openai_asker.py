@@ -15,8 +15,6 @@ from langchain.vectorstores.milvus import Milvus
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import DocumentCompressorPipeline
-from langchain_community.document_transformers import EmbeddingsRedundantFilter
-
 from langchain.retrievers.document_compressors import CohereRerank
 from langchain.retrievers.document_compressors import EmbeddingsFilter
 
