@@ -223,7 +223,7 @@ def ask_openai(context: BoltContext, question) -> str:
         embeddings=embeddings, similarity_threshold=0.76, k=6
     )
 
-    llm = OpenAI(api_key=OPENAI_API_KEY, temperature=0)
+    llm = OpenAI(api_key=OPENAI_API_KEY)
     llm_compressor = LLMChainExtractor.from_llm(llm)
     pipeline_compressor = DocumentCompressorPipeline(
         transformers=[relevant_filter, llm_compressor]
