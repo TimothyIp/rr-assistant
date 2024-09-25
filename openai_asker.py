@@ -216,7 +216,7 @@ def ask_openai(context: BoltContext, question) -> str:
 
     embeddings = OpenAIEmbeddings()
     relevant_filter = EmbeddingsFilter(
-        embeddings=embeddings, similarity_threshold=0.76, k=6
+        embeddings=embeddings, similarity_threshold=0.5, k=6
     )
 
     cohere_rerank_compressor = CohereRerank(
