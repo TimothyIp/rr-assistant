@@ -14,7 +14,11 @@ from langchain.vectorstores.pinecone import Pinecone
 from langchain.vectorstores.milvus import Milvus
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.retrievers import ContextualCompressionRetriever
-from langchain.retrievers.document_compressors import CohereRerank
+
+# from langchain.retrievers.document_compressors import CohereRerank
+from langchain.retrievers.document_compressors import EmbeddingsFilter
+
+
 from markdown import markdown_to_slack
 from personality_bank import ANIME_WEEB
 
@@ -210,11 +214,12 @@ def ask_openai(context: BoltContext, question) -> str:
     print("AI MODEL:", OPENAI_MODEL)
     retriever = get_vector_store_retriever()
 
-    compressor = CohereRerank(
-        top_n=4, cohere_api_key=os.environ["COHERE_API_KEY"], user_agent="langchain"
+    embeddings = OpenAIEmbeddings()
+    embeddings_filter = EmbeddingsFilter(
+        embeddings=embeddings, similarity_threshold=0.76, k=6
     )
     retriever = ContextualCompressionRetriever(
-        base_compressor=compressor, base_retriever=retriever
+        base_compressor=embeddings_filter, base_retriever=retriever
     )
 
     memory = ConversationBufferMemory(
@@ -297,10 +302,6 @@ def ask_openai(context: BoltContext, question) -> str:
 
     # Get the answer from the chain
     res = qa(question)
-    # res = qa(
-    #     "---------------------\n Given the context above, answer to the following question: "
-    #     + prompt
-    # )
     (
         answer,
         docs,
