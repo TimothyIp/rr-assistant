@@ -221,7 +221,7 @@ def ask_openai(context: BoltContext, question) -> str:
         embeddings=embeddings, similarity_threshold=0.76, k=6
     )
 
-    llm = llm_open_ai(temperature=0)
+    llm = llm_open_ai(temperature=0, model_name=OPENAI_MODEL)
     llm_compressor = LLMChainExtractor.from_llm(llm)
 
     # cohere_rerank_compressor = CohereRerank(
