@@ -250,7 +250,9 @@ def ask_openai(context: BoltContext, question) -> str:
         1. For URLs you should escape them like this:<http://example.com|This is a clickable link>.
         2. If you want to combine bullet list items with bold markdown, this is how it should work: – *A bold text*: A normal text. Never use 2 asterisks after anther like this **. It's an invalid markdown!
         3. If you don't know the answer, just say "I don't know the answer to that question."
-        4. You are given the following context and a question. Provide a detailed answer utilizing Slack's markdown language mrkdwn for various formatting elements..
+        4. You are given the following context and a question. Provide a concise and detailed answer utilizing Slack's markdown language mrkdwn for various formatting elements.
+        5. Use can use blockquote formatting by adding a ">" before the sentence
+        6. Enclose important words or phrases with *asterisks* for bold emphasis. Do not use multiple asterisks (** shouldn't exist, always only one asterisks *).
 
     Question: {question}
     =========
