@@ -17,8 +17,6 @@ from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import DocumentCompressorPipeline
 from langchain.retrievers.document_compressors import CohereRerank
 from langchain.retrievers.document_compressors import EmbeddingsFilter
-from langchain.retrievers.document_compressors import LLMChainExtractor
-from langchain.llms import OpenAI as llm_open_ai
 
 
 from markdown import markdown_to_slack
@@ -221,15 +219,12 @@ def ask_openai(context: BoltContext, question) -> str:
         embeddings=embeddings, similarity_threshold=0.76, k=6
     )
 
-    llm = llm_open_ai(temperature=0, model_name=OPENAI_MODEL)
-    llm_compressor = LLMChainExtractor.from_llm(llm)
-
-    # cohere_rerank_compressor = CohereRerank(
-    #     top_n=5, cohere_api_key=os.environ["COHERE_API_KEY"], user_agent="langchain"
-    # )
+    cohere_rerank_compressor = CohereRerank(
+        top_n=5, cohere_api_key=os.environ["COHERE_API_KEY"], user_agent="langchain"
+    )
 
     pipeline_compressor = DocumentCompressorPipeline(
-        transformers=[relevant_filter, llm_compressor]
+        transformers=[relevant_filter, cohere_rerank_compressor]
     )
 
     retriever = ContextualCompressionRetriever(
