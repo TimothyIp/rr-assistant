@@ -229,7 +229,7 @@ def ask_openai(context: BoltContext, question) -> str:
 
     template = """You are an helpful AI assistant for answering questions about Rose Rocket.
     You are given the following question and context. Provide a concise and detailed answer following Slack's markdown language mrkdwn for various formatting elements.
-    For URLs you should escape them like this:<http://example.com|This is a clickable link>
+    For URLs you should escape them like this:<http://example.com|This is a clickable link>. If you want to combine bullet list items with bold markdown, this is how it should work: – *A bold text*: A normal text. Never use 2 asterisks after anther like this **. It's an invalid markdown!
 
     If you don't know the answer, just say "I don't know the answer to that question."
 
