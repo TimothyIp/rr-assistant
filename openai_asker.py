@@ -239,7 +239,6 @@ def ask_openai(context: BoltContext, question) -> str:
         5. Use can use blockquote formatting by adding a ">" before the sentence
         6. Enclose important words or phrases with *asterisks* for bold emphasis. Do not use multiple asterisks (** shouldn't exist, always only one asterisks *).
         7. Do not add any image references markup when formatting elements
-        8. Utilize Slack's markdown language mrkdwn for various formatting elements.
 
     Question: {question}
     =========
