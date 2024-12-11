@@ -517,7 +517,7 @@ def show_summarize_option_modal(
                     "type": "plain_text_input",
                     "action_id": "input",
                     "multiline": True,
-                    "placeholder": {"type": "plain_text", "text": prompt},
+                    "initial_value": prompt,
                 },
                 "label": {
                     "type": "plain_text",
@@ -685,7 +685,7 @@ def show_summarize_channel_option_modal(
                 "type": "plain_text_input",
                 "action_id": "input",
                 "multiline": True,
-                "placeholder": {"type": "plain_text", "text": prompt},
+                "initial_value": prompt,
             },
             "label": {
                 "type": "plain_text",

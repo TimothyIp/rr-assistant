@@ -68,15 +68,14 @@ def generate_slack_thread_summary(
         {
             "role": "system",
             "content": (
-                "You're an assistant tasked with helping Slack users by summarizing threads.\n"
+                "You're an assistant tasked with helping Slack users by summarizing threads. "
                 "You'll receive a collection of replies in this format: <@user_id>: reply text\n"
-                "Your role is to provide a very detailed summary that highlights key facts and which <@user_id made which decision. Always return this summary in Markdown format in a bullet list form with bold section categories\n"
-                f"{prompt}"
+                "Your role is to provide a very detailed summary that highlights key facts and which <@user_id made which decision. Always return this summary in Markdown format in a bullet list form with bold section categories"
             ),
         },
         {
             "role": "user",
-            "content": f"{thread_content}",
+            "content": f"{prompt}\n\n{thread_content}",
         },
     ]
     start_time = time.time()
