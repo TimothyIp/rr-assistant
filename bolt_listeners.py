@@ -512,6 +512,7 @@ def show_summarize_option_modal(
             },
             {
                 "type": "input",
+                "optional": True,
                 "block_id": "prompt",
                 "element": {
                     "type": "plain_text_input",
@@ -681,6 +682,7 @@ def show_summarize_channel_option_modal(
         {
             "type": "input",
             "block_id": "prompt",
+            "optional": True,
             "element": {
                 "type": "plain_text_input",
                 "action_id": "input",
